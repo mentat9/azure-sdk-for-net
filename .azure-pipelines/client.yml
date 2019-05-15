@@ -8,7 +8,8 @@ trigger:
   - master
 
 variables:
-  DotNetCoreVersion: '2.1.503'
+  DotNetCoreSDKVersion: '3.0.100-preview5-011568'
+  DotNetCoreRuntimeVersion: '2.1.10'
 
 jobs:
   - job: 'Build'
@@ -17,10 +18,10 @@ jobs:
       vmImage: 'vs2017-win2016'
 
     steps:
-      - task: DotNetCoreInstaller@0
-        displayName: 'Use .NET Core sdk $(DotNetCoreVersion)'
+      - task: DotNetCoreInstaller@2
+        displayName: 'Use .NET Core sdk $(DotNetCoreSDKVersion)'
         inputs:
-          version: '$(DotNetCoreVersion)'
+          version: '$(DotNetCoreSDKVersion)'
 
       - script: 'dotnet pack $(ProjectFile) -o $(Build.ArtifactStagingDirectory) -warnaserror'
         displayName: 'Build and Package'
@@ -99,10 +100,17 @@ jobs:
           scriptPath: '$(Build.BinariesDirectory)/sdk-tools/scripts/python/verify_agent_os.py'
           arguments: $(OSName)
 
-      - task: DotNetCoreInstaller@0
-        displayName: 'Use .NET Core sdk $(DotNetCoreVersion)'
+      - task: DotNetCoreInstaller@2
+        displayName: 'Use .NET Core runtime $(DotNetCoreRuntimeVersion)'
         inputs:
-          version: '$(DotNetCoreVersion)'
+          packageType: runtime
+          version: '$(DotNetCoreRuntimeVersion)'
+
+      - task: DotNetCoreInstaller@2
+        displayName: 'Use .NET Core sdk $(DotNetCoreSDKVersion)'
+        inputs:
+          packageType: sdk
+          version: '$(DotNetCoreSDKVersion)'
 
       - task: DotNetCoreCLI@2
         displayName: 'Build & Test (no live tests)'
@@ -136,6 +144,6 @@ jobs:
         condition: succeededOrFailed()
         inputs:
           testResultsFiles: '**/*.trx'
-          testRunTitle: '$(OSName) DotNet $(DotNetCoreVersion)'
+          testRunTitle: '$(OSName) DotNet $(DotNetCoreRuntimeVersion)'
           testResultsFormat: 'VSTest'
           mergeTestResults: true
