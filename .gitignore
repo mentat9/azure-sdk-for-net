@@ -114,6 +114,7 @@ tools/*.dll
 
 # Sensitive files
 *.keys
+!Azure.Security.KeyVault.Keys
 *.pfx
 
 # Backup & report files from converting an old project file to a newer
